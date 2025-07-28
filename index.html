@@ -1,0 +1,220 @@
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>خدمات خودرو در مشهد - تعمیر و نگهداری خودرو</title>
+  <link href="style.css" rel="stylesheet" type="text/css" />
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <!-- هدر -->
+  <header class="header">
+    <div class="container">
+      <div class="header-content">
+        <div class="header-text">
+          <h1 class="logo">🚗 خدمات خودرو مشهد</h1>
+          <p class="tagline">تعمیر و نگهداری خودرو در محل</p>
+        </div>
+        <button class="theme-toggle" id="themeToggle" aria-label="تغییر تم">
+          <span class="theme-icon">🌙</span>
+          <span class="theme-text">تم تیره</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- بخش اصلی -->
+  <main class="main">
+    <div class="container">
+      <!-- معرفی خدمات -->
+      <section class="services-intro">
+        <h2 class="section-title">خدمات ما</h2>
+        <div class="services-grid">
+          <div class="service-card">
+            <div class="service-icon">🔋</div>
+            <h3>باتری به باتری</h3>
+            <p>تعویض و شارژ باتری خودرو در محل</p>
+          </div>
+          <div class="service-card">
+            <div class="service-icon">🔧</div>
+            <h3>تعمیر موتور</h3>
+            <p>تعمیر انواع مشکلات موتور</p>
+          </div>
+          <div class="service-card">
+            <div class="service-icon">⚫</div>
+            <h3>تعویض لاستیک</h3>
+            <p>تعویض و تعمیر لاستیک در محل</p>
+          </div>
+          <div class="service-card">
+            <div class="service-icon">🔩</div>
+            <h3>تعمیرات عمومی</h3>
+            <p>انواع تعمیرات مکانیکی خودرو</p>
+          </div>
+          <div class="service-card">
+            <div class="service-icon">⚡</div>
+            <h3>برق خودرو</h3>
+            <p>تعمیر سیستم برقی و الکترونیک</p>
+          </div>
+          <div class="service-card">
+            <div class="service-icon">🧊</div>
+            <h3>کولر و رادیاتور</h3>
+            <p>تعمیر سیستم خنک کننده</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- فرم درخواست خدمات -->
+      <section class="booking-form-section">
+        <h2 class="section-title">درخواست خدمات</h2>
+        <div class="form-container">
+          <form class="booking-form" id="serviceForm">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="fullName">نام و نام خانوادگی *</label>
+                <input type="text" id="fullName" name="fullName" required>
+              </div>
+              <div class="form-group">
+                <label for="phone">شماره تماس *</label>
+                <input type="tel" id="phone" name="phone" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="carBrand">برند خودرو</label>
+                <select id="carBrand" name="carBrand">
+                  <option value="">انتخاب کنید</option>
+                  <option value="iran-khodro">ایران خودرو</option>
+                  <option value="saipa">سایپا</option>
+                  <option value="peugeot">پژو</option>
+                  <option value="renault">رنو</option>
+                  <option value="hyundai">هیوندای</option>
+                  <option value="kia">کیا</option>
+                  <option value="toyota">تویوتا</option>
+                  <option value="other">سایر</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="carModel">مدل خودرو</label>
+                <input type="text" id="carModel" name="carModel" placeholder="مثال: پراید، ۲۰۶، ساندرو">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="location">آدرس محل *</label>
+              <textarea id="location" name="location" rows="3" placeholder="آدرس کامل محل (منطقه، خیابان، پلاک)" required></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="serviceType">نوع خدمات مورد نیاز *</label>
+              <div class="checkbox-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" name="services" value="battery">
+                  <span class="checkmark"></span>
+                  باتری به باتری
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" name="services" value="engine">
+                  <span class="checkmark"></span>
+                  تعمیر موتور
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" name="services" value="tire">
+                  <span class="checkmark"></span>
+                  تعویض لاستیک
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" name="services" value="general">
+                  <span class="checkmark"></span>
+                  تعمیرات عمومی
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" name="services" value="electrical">
+                  <span class="checkmark"></span>
+                  برق خودرو
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" name="services" value="cooling">
+                  <span class="checkmark"></span>
+                  کولر و رادیاتور
+                </label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="description">توضیحات مشکل</label>
+              <textarea id="description" name="description" rows="4" placeholder="مشکل خودرو را به تفصیل شرح دهید..."></textarea>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="preferredTime">زمان ترجیحی</label>
+                <select id="preferredTime" name="preferredTime">
+                  <option value="">انتخاب کنید</option>
+                  <option value="morning">صبح (۸-۱۲)</option>
+                  <option value="afternoon">بعدازظهر (۱۲-۱۷)</option>
+                  <option value="evening">عصر (۱۷-۲۰)</option>
+                  <option value="asap">هر چه زودتر</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="urgency">میزان فوریت</label>
+                <select id="urgency" name="urgency">
+                  <option value="normal">عادی</option>
+                  <option value="urgent">فوری</option>
+                  <option value="emergency">اورژانسی</option>
+                </select>
+              </div>
+            </div>
+
+            <button type="submit" class="submit-btn">ارسال درخواست</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- اطلاعات تماس -->
+      <section class="contact-info">
+        <h2 class="section-title">تماس با ما</h2>
+        <div class="contact-grid">
+          <div class="contact-item">
+            <div class="contact-icon">📞</div>
+            <h3>تماس فوری</h3>
+            <p>۰۵۱-۳۸۸۸۹۹۹۹</p>
+          </div>
+          <div class="contact-item">
+            <div class="contact-icon">📱</div>
+            <h3>واتساپ</h3>
+            <p>۰۹۱۵-۱۲۳-۴۵۶۷</p>
+          </div>
+          <div class="contact-item">
+            <div class="contact-icon">🕐</div>
+            <h3>ساعات کاری</h3>
+            <p>۲۴ ساعته - ۷ روز هفته</p>
+          </div>
+          <div class="contact-item">
+            <div class="contact-icon">📍</div>
+            <h3>محدوده خدمات</h3>
+            <p>تمام نقاط مشهد</p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- فوتر -->
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; ۱۴۰۳ خدمات خودرو مشهد - تمامی حقوق محفوظ است</p>
+    </div>
+  </footer>
+
+  <!-- EmailJS CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script type="module" src="script.js"></script>
+</body>
+
+</html>
