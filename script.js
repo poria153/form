@@ -1,368 +1,442 @@
-
-// تنظیمات EmailJS
-const EMAILJS_PUBLIC_KEY = "tOl5cxHrmzOttylqi"; // باید کلید عمومی EmailJS را جایگزین کنید
-const EMAILJS_SERVICE_ID = "service_z9cp9lo"; // باید Service ID را جایگزین کنید
-const EMAILJS_TEMPLATE_ID = "template_utvocxj"; // باید Template ID را جایگزین کنید
-
-// EmailJS تنظیم شده است
-console.log("EmailJS آماده برای استفاده است");
-
-emailjs.init(EMAILJS_PUBLIC_KEY);
-
-// مدیریت تم
-class ThemeManager {
+// IoT Dashboard JavaScript
+class IoTDashboard {
     constructor() {
-        this.themeToggle = document.getElementById('themeToggle');
-        this.themeIcon = this.themeToggle.querySelector('.theme-icon');
-        this.themeText = this.themeToggle.querySelector('.theme-text');
-        
-        // تنظیم تم پیش‌فرض به لایت مود
-        this.currentTheme = localStorage.getItem('theme') || 'light';
-        this.setTheme(this.currentTheme);
-        
-        this.themeToggle.addEventListener('click', () => this.toggleTheme());
-    }
-    
-    setTheme(theme) {
-        this.currentTheme = theme;
-        document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem('theme', theme);
-        
-        if (theme === 'dark') {
-            this.themeIcon.textContent = '☀️';
-            this.themeText.textContent = 'تم روشن';
-        } else {
-            this.themeIcon.textContent = '🌙';
-            this.themeText.textContent = 'تم تیره';
-        }
-        
-        // انیمیشن تغییر تم
-        document.body.style.transition = 'all 0.3s ease';
-        setTimeout(() => {
-            document.body.style.transition = '';
-        }, 300);
-    }
-    
-    toggleTheme() {
-        const newTheme = this.currentTheme === 'light' ? 'dark' : 'light';
-        this.setTheme(newTheme);
-        
-        // انیمیشن دکمه
-        this.themeToggle.style.transform = 'scale(0.9)';
-        setTimeout(() => {
-            this.themeToggle.style.transform = 'scale(1)';
-        }, 150);
-    }
-}
-
-// راه‌اندازی مدیر تم
-const themeManager = new ThemeManager();
-
-// فرم درخواست خدمات
-document.getElementById('serviceForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    // دریافت داده‌های فرم
-    const formData = new FormData(this);
-    const data = {};
-    
-    // تبدیل FormData به object
-    for (let [key, value] of formData.entries()) {
-        if (data[key]) {
-            // اگر کلید وجود دارد، آن را به آرایه تبدیل کن
-            if (Array.isArray(data[key])) {
-                data[key].push(value);
-            } else {
-                data[key] = [data[key], value];
-            }
-        } else {
-            data[key] = value;
-        }
-    }
-    
-    // اعتبارسنجی فیلدهای ضروری
-    if (!data.fullName || !data.phone || !data.location) {
-        showNotification('لطفاً تمام فیلدهای ضروری را پر کنید', 'error');
-        return;
-    }
-    
-    // بررسی انتخاب حداقل یک خدمت
-    if (!data.services) {
-        showNotification('لطفاً حداقل یک نوع خدمت را انتخاب کنید', 'error');
-        return;
-    }
-    
-    // اعتبارسنجی شماره تلفن
-    const phoneRegex = /^(\+98|0)?9\d{9}$/;
-    if (!phoneRegex.test(data.phone.replace(/\s|-/g, ''))) {
-        showNotification('لطفاً شماره تلفن معتبر وارد کنید', 'error');
-        return;
-    }
-
-    // EmailJS آماده برای ارسال
-    console.log("در حال ارسال ایمیل به:", "kavehahangar8778@gmail.com");
-    
-    // آماده‌سازی داده‌ها برای ارسال
-    const servicesArray = Array.isArray(data.services) ? data.services : [data.services];
-    const servicesText = servicesArray.map(service => {
-        const serviceNames = {
-            'battery': 'باتری به باتری',
-            'engine': 'تعمیر موتور',
-            'tire': 'تعویض لاستیک',
-            'general': 'تعمیرات عمومی',
-            'electrical': 'برق خودرو',
-            'cooling': 'کولر و رادیاتور'
+        this.websocket = null;
+        this.isConnected = false;
+        this.sensorData = {
+            temperature: null,
+            humidity: null,
+            pressure: null,
+            light: null
         };
-        return serviceNames[service] || service;
-    }).join('، ');
-    
-    const timeNames = {
-        'morning': 'صبح (۸-۱۲)',
-        'afternoon': 'بعدازظهر (۱۲-۱۷)',
-        'evening': 'عصر (۱۷-۲۰)',
-        'asap': 'هر چه زودتر'
-    };
-    
-    const urgencyNames = {
-        'normal': 'عادی',
-        'urgent': 'فوری',
-        'emergency': 'اورژانسی'
-    };
-    
-    // ارسال ایمیل
-    showNotification('در حال ارسال درخواست...', 'info');
-    
-    emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-        to_email: "kavehahangar8778@gmail.com",
-        customer_name: data.fullName,
-        customer_phone: data.phone,
-        car_brand: data.carBrand || 'مشخص نشده',
-        car_model: data.carModel || 'مشخص نشده',
-        location: data.location,
-        services: servicesText,
-        description: data.description || 'توضیحاتی ارائه نشده',
-        preferred_time: timeNames[data.preferredTime] || 'مشخص نشده',
-        urgency: urgencyNames[data.urgency] || 'عادی',
-        date: new Date().toLocaleDateString('fa-IR'),
-        time: new Date().toLocaleTimeString('fa-IR')
-    })
-    .then(function(response) {
-        console.log('SUCCESS!', response.status, response.text);
-        showNotification('درخواست شما با موفقیت ارسال شد! به زودی با شما تماس خواهیم گرفت', 'success');
-        // پاک کردن فرم
-        document.getElementById('serviceForm').reset();
-    })
-    .catch(function(error) {
-        console.log('FAILED...', error);
-        showNotification('خطا در ارسال درخواست. لطفاً دوباره تلاش کنید یا با ما تماس بگیرید', 'error');
-    });
-});
-
-// تابع نمایش اعلان
-function showNotification(message, type) {
-    // حذف اعلان قبلی در صورت وجود
-    const existingNotification = document.querySelector('.notification');
-    if (existingNotification) {
-        existingNotification.remove();
-    }
-    
-    // ایجاد المان اعلان
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    
-    let icon, bgColor, textColor, borderColor;
-    switch(type) {
-        case 'success':
-            icon = '✅';
-            bgColor = '#d4edda';
-            textColor = '#155724';
-            borderColor = '#c3e6cb';
-            break;
-        case 'error':
-            icon = '❌';
-            bgColor = '#f8d7da';
-            textColor = '#721c24';
-            borderColor = '#f5c6cb';
-            break;
-        case 'info':
-            icon = '⏳';
-            bgColor = '#d1ecf1';
-            textColor = '#0c5460';
-            borderColor = '#bee5eb';
-            break;
-        default:
-            icon = 'ℹ️';
-            bgColor = '#d1ecf1';
-            textColor = '#0c5460';
-            borderColor = '#bee5eb';
-    }
-    
-    notification.innerHTML = `
-        <div class="notification-content">
-            <span class="notification-icon">${icon}</span>
-            <span class="notification-message">${message}</span>
-            <button class="notification-close" onclick="this.parentElement.parentElement.remove()">×</button>
-        </div>
-    `;
-    
-    // اضافه کردن استایل
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 1000;
-        max-width: 400px;
-        background: ${bgColor};
-        color: ${textColor};
-        border: 1px solid ${borderColor};
-        border-radius: 10px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        font-family: 'Vazirmatn', 'Tahoma', sans-serif;
-        animation: slideInRight 0.3s ease-out;
-    `;
-    
-    // اضافه کردن به صفحه
-    document.body.appendChild(notification);
-    
-    // حذف خودکار بعد از 5 ثانیه
-    setTimeout(() => {
-        if (notification.parentElement) {
-            notification.style.animation = 'slideOutRight 0.3s ease-in';
-            setTimeout(() => notification.remove(), 300);
-        }
-    }, 5000);
-}
-
-// اضافه کردن انیمیشن برای اعلان‌ها
-const style = document.createElement('style');
-style.textContent = `
-    .notification-content {
-        display: flex;
-        align-items: center;
-        padding: 15px;
-        gap: 10px;
-    }
-    
-    .notification-icon {
-        font-size: 1.2rem;
-    }
-    
-    .notification-message {
-        flex: 1;
-        font-size: 0.9rem;
-        line-height: 1.4;
-    }
-    
-    .notification-close {
-        background: none;
-        border: none;
-        font-size: 1.5rem;
-        cursor: pointer;
-        color: inherit;
-        opacity: 0.7;
-        transition: opacity 0.2s;
-    }
-    
-    .notification-close:hover {
-        opacity: 1;
-    }
-    
-    @keyframes slideInRight {
-        from {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-    
-    @keyframes slideOutRight {
-        from {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        to {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-    }
-`;
-document.head.appendChild(style);
-
-// انیمیشن اسکرول نرم
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-            target.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
-            });
-        }
-    });
-});
-
-// تنظیم فوکوس روی فیلدهای فرم
-document.querySelectorAll('input, select, textarea').forEach(element => {
-    element.addEventListener('focus', function() {
-        this.parentElement.style.transform = 'scale(1.02)';
-    });
-    
-    element.addEventListener('blur', function() {
-        this.parentElement.style.transform = 'scale(1)';
-    });
-});
-
-// افکت تایپ برای عنوان اصلی
-function typeWriter(element, text, speed = 100) {
-    let i = 0;
-    element.innerHTML = '';
-    
-    function type() {
-        if (i < text.length) {
-            element.innerHTML += text.charAt(i);
-            i++;
-            setTimeout(type, speed);
-        }
-    }
-    
-    type();
-}
-
-// اجرای انیمیشن تایپ هنگام لود صفحه
-window.addEventListener('load', function() {
-    const logo = document.querySelector('.logo');
-    if (logo) {
-        const originalText = logo.textContent;
-        typeWriter(logo, originalText, 150);
-    }
-});
-
-// انیمیشن ظاهر شدن کارت‌ها هنگام اسکرول
-function animateOnScroll() {
-    const elements = document.querySelectorAll('.service-card, .contact-item');
-    
-    elements.forEach(element => {
-        const elementTop = element.getBoundingClientRect().top;
-        const elementVisible = 150;
+        this.sensorHistory = {
+            temperature: [],
+            humidity: [],
+            pressure: [],
+            light: []
+        };
         
-        if (elementTop < window.innerHeight - elementVisible) {
-            element.style.opacity = '1';
-            element.style.transform = 'translateY(0)';
+        this.init();
+    }
+
+    init() {
+        this.setupThemeToggle();
+        this.setupWebSocketControls();
+        this.setupDeviceControls();
+        this.setupLogControls();
+        this.loadThemePreference();
+    }
+
+    // Theme Management
+    setupThemeToggle() {
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            this.toggleTheme();
+        });
+    }
+
+    toggleTheme() {
+        const body = document.body;
+        const isDark = body.classList.contains('dark-mode');
+        
+        if (isDark) {
+            body.classList.remove('dark-mode');
+            body.classList.add('light-mode');
+            localStorage.setItem('theme', 'light');
+        } else {
+            body.classList.remove('light-mode');
+            body.classList.add('dark-mode');
+            localStorage.setItem('theme', 'dark');
         }
-    });
+    }
+
+    loadThemePreference() {
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        const body = document.body;
+        
+        body.classList.remove('dark-mode', 'light-mode');
+        body.classList.add(savedTheme === 'light' ? 'light-mode' : 'dark-mode');
+    }
+
+    // WebSocket Management
+    setupWebSocketControls() {
+        const connectBtn = document.getElementById('connectBtn');
+        const disconnectBtn = document.getElementById('disconnectBtn');
+        const websocketUrl = document.getElementById('websocketUrl');
+
+        connectBtn.addEventListener('click', () => {
+            this.connectWebSocket(websocketUrl.value);
+        });
+
+        disconnectBtn.addEventListener('click', () => {
+            this.disconnectWebSocket();
+        });
+    }
+
+    connectWebSocket(url) {
+        if (!url) {
+            this.addLogMessage('Please enter a WebSocket URL', 'error');
+            return;
+        }
+
+        try {
+            this.websocket = new WebSocket(url);
+            
+            this.websocket.onopen = () => {
+                this.isConnected = true;
+                this.updateConnectionStatus(true);
+                this.addLogMessage('Connected to ESP32', 'success');
+                this.enableDeviceControls();
+            };
+
+            this.websocket.onmessage = (event) => {
+                this.handleWebSocketMessage(event.data);
+            };
+
+            this.websocket.onclose = () => {
+                this.isConnected = false;
+                this.updateConnectionStatus(false);
+                this.addLogMessage('Disconnected from ESP32', 'warning');
+                this.disableDeviceControls();
+            };
+
+            this.websocket.onerror = (error) => {
+                this.addLogMessage('WebSocket error: ' + error.message, 'error');
+            };
+
+        } catch (error) {
+            this.addLogMessage('Failed to connect: ' + error.message, 'error');
+        }
+    }
+
+    disconnectWebSocket() {
+        if (this.websocket) {
+            this.websocket.close();
+            this.websocket = null;
+        }
+    }
+
+    updateConnectionStatus(connected) {
+        const statusIndicator = document.getElementById('connectionStatus');
+        const statusText = statusIndicator.querySelector('.status-text');
+        const statusDot = statusIndicator.querySelector('.status-dot');
+
+        if (connected) {
+            statusIndicator.classList.add('connected');
+            statusText.textContent = 'Connected';
+        } else {
+            statusIndicator.classList.remove('connected');
+            statusText.textContent = 'Disconnected';
+        }
+
+        // Update button states
+        const connectBtn = document.getElementById('connectBtn');
+        const disconnectBtn = document.getElementById('disconnectBtn');
+
+        connectBtn.disabled = connected;
+        disconnectBtn.disabled = !connected;
+    }
+
+    handleWebSocketMessage(data) {
+        try {
+            const message = JSON.parse(data);
+            this.addLogMessage(`Received: ${JSON.stringify(message)}`, 'info');
+            
+            // Handle different message types
+            if (message.type === 'sensor_data') {
+                this.updateSensorData(message.data);
+            } else if (message.type === 'status') {
+                this.addLogMessage(`Status: ${message.message}`, 'info');
+            } else if (message.type === 'error') {
+                this.addLogMessage(`Error: ${message.message}`, 'error');
+            }
+        } catch (error) {
+            // Handle non-JSON messages
+            this.addLogMessage(`Raw message: ${data}`, 'info');
+        }
+    }
+
+    // Sensor Data Management
+    updateSensorData(data) {
+        // Update sensor values
+        if (data.temperature !== undefined) {
+            this.sensorData.temperature = data.temperature;
+            document.getElementById('temperatureValue').textContent = `${data.temperature}°C`;
+            this.updateSensorHistory('temperature', data.temperature);
+        }
+
+        if (data.humidity !== undefined) {
+            this.sensorData.humidity = data.humidity;
+            document.getElementById('humidityValue').textContent = `${data.humidity}%`;
+            this.updateSensorHistory('humidity', data.humidity);
+        }
+
+        if (data.pressure !== undefined) {
+            this.sensorData.pressure = data.pressure;
+            document.getElementById('pressureValue').textContent = `${data.pressure} hPa`;
+            this.updateSensorHistory('pressure', data.pressure);
+        }
+
+        if (data.light !== undefined) {
+            this.sensorData.light = data.light;
+            document.getElementById('lightValue').textContent = `${data.light} lux`;
+            this.updateSensorHistory('light', data.light);
+        }
+    }
+
+    updateSensorHistory(sensorType, value) {
+        const history = this.sensorHistory[sensorType];
+        history.push({
+            value: value,
+            timestamp: Date.now()
+        });
+
+        // Keep only last 50 readings
+        if (history.length > 50) {
+            history.shift();
+        }
+
+        // Update chart visualization
+        this.updateSensorChart(sensorType);
+    }
+
+    updateSensorChart(sensorType) {
+        const chartElement = document.getElementById(`${sensorType}Chart`);
+        const history = this.sensorHistory[sensorType];
+        
+        if (history.length < 2) return;
+
+        // Create a simple bar chart visualization
+        const maxValue = Math.max(...history.map(h => h.value));
+        const minValue = Math.min(...history.map(h => h.value));
+        const range = maxValue - minValue || 1;
+
+        const bars = history.slice(-10).map(h => {
+            const height = ((h.value - minValue) / range) * 100;
+            return `<div class="chart-bar" style="height: ${height}%"></div>`;
+        }).join('');
+
+        chartElement.innerHTML = `
+            <div class="chart-container">
+                ${bars}
+            </div>
+        `;
+    }
+
+    // Device Controls
+    setupDeviceControls() {
+        // LED Controls
+        const ledCheckboxes = document.querySelectorAll('input[data-led]');
+        ledCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', (e) => {
+                this.sendLEDCommand(e.target.dataset.led, e.target.checked);
+            });
+        });
+
+        // Servo Control
+        const servoSlider = document.getElementById('servoAngle');
+        const servoValue = document.getElementById('servoValue');
+        
+        servoSlider.addEventListener('input', (e) => {
+            const value = e.target.value;
+            servoValue.textContent = `${value}°`;
+        });
+
+        servoSlider.addEventListener('change', (e) => {
+            this.sendServoCommand(e.target.value);
+        });
+
+        // Motor Control
+        const motorSlider = document.getElementById('motorSpeed');
+        const motorValue = document.getElementById('motorValue');
+        
+        motorSlider.addEventListener('input', (e) => {
+            const value = e.target.value;
+            motorValue.textContent = `${value}%`;
+        });
+
+        motorSlider.addEventListener('change', (e) => {
+            this.sendMotorCommand(e.target.value);
+        });
+    }
+
+    enableDeviceControls() {
+        const controls = document.querySelectorAll('.control-card input, .control-card select');
+        controls.forEach(control => {
+            control.disabled = false;
+        });
+    }
+
+    disableDeviceControls() {
+        const controls = document.querySelectorAll('.control-card input, .control-card select');
+        controls.forEach(control => {
+            control.disabled = true;
+        });
+    }
+
+    sendLEDCommand(ledNumber, state) {
+        const command = {
+            type: 'led_control',
+            led: parseInt(ledNumber),
+            state: state
+        };
+        this.sendWebSocketMessage(command);
+    }
+
+    sendServoCommand(angle) {
+        const command = {
+            type: 'servo_control',
+            angle: parseInt(angle)
+        };
+        this.sendWebSocketMessage(command);
+    }
+
+    sendMotorCommand(speed) {
+        const command = {
+            type: 'motor_control',
+            speed: parseInt(speed)
+        };
+        this.sendWebSocketMessage(command);
+    }
+
+    sendWebSocketMessage(message) {
+        if (this.websocket && this.isConnected) {
+            this.websocket.send(JSON.stringify(message));
+            this.addLogMessage(`Sent: ${JSON.stringify(message)}`, 'info');
+        } else {
+            this.addLogMessage('Not connected to ESP32', 'error');
+        }
+    }
+
+    // Log Management
+    setupLogControls() {
+        const clearLogBtn = document.getElementById('clearLog');
+        const exportLogBtn = document.getElementById('exportLog');
+
+        clearLogBtn.addEventListener('click', () => {
+            this.clearLog();
+        });
+
+        exportLogBtn.addEventListener('click', () => {
+            this.exportLog();
+        });
+    }
+
+    addLogMessage(message, type = 'info') {
+        const logContainer = document.getElementById('messageLog');
+        const timestamp = new Date().toLocaleTimeString();
+        
+        const logEntry = document.createElement('div');
+        logEntry.className = `log-entry ${type}`;
+        logEntry.innerHTML = `
+            <span class="timestamp">[${timestamp}]</span>
+            <span class="message">${message}</span>
+        `;
+
+        logContainer.appendChild(logEntry);
+        logContainer.scrollTop = logContainer.scrollHeight;
+
+        // Keep only last 100 entries
+        const entries = logContainer.querySelectorAll('.log-entry');
+        if (entries.length > 100) {
+            entries[0].remove();
+        }
+    }
+
+    clearLog() {
+        const logContainer = document.getElementById('messageLog');
+        logContainer.innerHTML = '';
+        this.addLogMessage('Log cleared', 'info');
+    }
+
+    exportLog() {
+        const logContainer = document.getElementById('messageLog');
+        const entries = logContainer.querySelectorAll('.log-entry');
+        
+        let logText = 'IoT Dashboard Log\n';
+        logText += '================\n\n';
+        
+        entries.forEach(entry => {
+            const timestamp = entry.querySelector('.timestamp').textContent;
+            const message = entry.querySelector('.message').textContent;
+            logText += `${timestamp} ${message}\n`;
+        });
+
+        const blob = new Blob([logText], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `iot-dashboard-log-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        this.addLogMessage('Log exported successfully', 'success');
+    }
+
+    // Utility Methods
+    formatNumber(num) {
+        return parseFloat(num).toFixed(2);
+    }
+
+    getRandomValue(min, max) {
+        return Math.random() * (max - min) + min;
+    }
+
+    // Simulate sensor data for testing (remove in production)
+    simulateSensorData() {
+        if (!this.isConnected) return;
+
+        const mockData = {
+            type: 'sensor_data',
+            data: {
+                temperature: this.getRandomValue(20, 30),
+                humidity: this.getRandomValue(40, 80),
+                pressure: this.getRandomValue(1000, 1020),
+                light: this.getRandomValue(100, 1000)
+            }
+        };
+
+        this.handleWebSocketMessage(JSON.stringify(mockData));
+    }
 }
 
-// اعمال انیمیشن اولیه
-document.querySelectorAll('.service-card, .contact-item').forEach(element => {
-    element.style.opacity = '0';
-    element.style.transform = 'translateY(30px)';
-    element.style.transition = 'all 0.6s ease-out';
+// Initialize dashboard when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    const dashboard = new IoTDashboard();
+    
+    // For testing purposes - simulate sensor data every 2 seconds
+    // Remove this in production
+    setInterval(() => {
+        if (dashboard.isConnected) {
+            dashboard.simulateSensorData();
+        }
+    }, 2000);
 });
 
-// اجرای انیمیشن هنگام اسکرول
-window.addEventListener('scroll', animateOnScroll);
-window.addEventListener('load', animateOnScroll);
+// Add CSS for chart visualization
+const chartStyles = `
+<style>
+.chart-container {
+    display: flex;
+    align-items: end;
+    height: 100%;
+    gap: 2px;
+}
+
+.chart-bar {
+    flex: 1;
+    background: linear-gradient(to top, var(--primary-light), var(--accent));
+    border-radius: 2px;
+    min-height: 4px;
+    transition: height 0.3s ease;
+}
+
+.chart-bar:hover {
+    background: var(--accent);
+}
+</style>
+`;
+
+document.head.insertAdjacentHTML('beforeend', chartStyles);
