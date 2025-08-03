@@ -366,3 +366,540 @@ document.querySelectorAll('.service-card, .contact-item').forEach(element => {
 // اجرای انیمیشن هنگام اسکرول
 window.addEventListener('scroll', animateOnScroll);
 window.addEventListener('load', animateOnScroll);
+
+class ESP32Dashboard {
+    constructor() {
+        this.websocket = null;
+        this.isConnected = false;
+        this.chart = null;
+        this.chartData = {
+            labels: [],
+            temperature: [],
+            humidity: [],
+            light: [],
+            voltage: []
+        };
+        
+        this.init();
+    }
+
+    init() {
+        this.setupEventListeners();
+        this.setupChart();
+        this.setupThemeToggle();
+        this.logMessage('Dashboard initialized', 'system');
+    }
+
+    setupEventListeners() {
+        // Connection controls
+        document.getElementById('connectBtn').addEventListener('click', () => this.connect());
+        document.getElementById('disconnectBtn').addEventListener('click', () => this.disconnect());
+        
+        // Device controls
+        document.getElementById('led1').addEventListener('change', (e) => this.sendControl('led1', e.target.checked));
+        document.getElementById('led2').addEventListener('change', (e) => this.sendControl('led2', e.target.checked));
+        document.getElementById('fan').addEventListener('change', (e) => this.sendControl('fan', e.target.checked));
+        
+        // Servo control
+        const servo = document.getElementById('servo');
+        servo.addEventListener('input', (e) => {
+            document.getElementById('servoValue').textContent = e.target.value + '°';
+            this.sendControl('servo', parseInt(e.target.value));
+        });
+        
+        // Log controls
+        document.getElementById('clearLogBtn').addEventListener('click', () => this.clearLog());
+    }
+
+    setupThemeToggle() {
+        const lightModeBtn = document.getElementById('lightModeBtn');
+        const darkModeBtn = document.getElementById('darkModeBtn');
+        const body = document.body;
+
+        // Set initial state - dark mode by default as requested
+        body.classList.add('dark-mode');
+        darkModeBtn.classList.add('active');
+        lightModeBtn.classList.remove('active');
+
+        lightModeBtn.addEventListener('click', () => {
+            body.classList.remove('dark-mode');
+            lightModeBtn.classList.add('active');
+            darkModeBtn.classList.remove('active');
+            this.logMessage('Switched to light mode', 'system');
+        });
+
+        darkModeBtn.addEventListener('click', () => {
+            body.classList.add('dark-mode');
+            darkModeBtn.classList.add('active');
+            lightModeBtn.classList.remove('active');
+            this.logMessage('Switched to dark mode', 'system');
+        });
+    }
+
+    setupChart() {
+        const ctx = document.getElementById('dataChart').getContext('2d');
+        
+        this.chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: this.chartData.labels,
+                datasets: [
+                    {
+                        label: 'Temperature (°C)',
+                        data: this.chartData.temperature,
+                        borderColor: '#B13BFF',
+                        backgroundColor: 'rgba(177, 59, 255, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: 'Humidity (%)',
+                        data: this.chartData.humidity,
+                        borderColor: '#FFCC00',
+                        backgroundColor: 'rgba(255, 204, 0, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: 'Light (lux)',
+                        data: this.chartData.light,
+                        borderColor: '#471396',
+                        backgroundColor: 'rgba(71, 19, 150, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: 'Voltage (V)',
+                        data: this.chartData.voltage,
+                        borderColor: '#090040',
+                        backgroundColor: 'rgba(9, 0, 64, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Time'
+                        }
+                    },
+                    y: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Values'
+                        }
+                    }
+                },
+                animation: {
+                    duration: 750
+                }
+            }
+        });
+    }
+
+    connect() {
+        const url = document.getElementById('websocketUrl').value.trim();
+        
+        if (!url) {
+            this.logMessage('Please enter a WebSocket URL', 'error');
+            return;
+        }
+
+        if (this.isConnected) {
+            this.logMessage('Already connected', 'error');
+            return;
+        }
+
+        try {
+            this.logMessage(`Connecting to ${url}...`, 'sent');
+            this.websocket = new WebSocket(url);
+            
+            this.websocket.onopen = () => this.onWebSocketOpen();
+            this.websocket.onmessage = (event) => this.onWebSocketMessage(event);
+            this.websocket.onclose = () => this.onWebSocketClose();
+            this.websocket.onerror = (error) => this.onWebSocketError(error);
+            
+        } catch (error) {
+            this.logMessage(`Connection failed: ${error.message}`, 'error');
+        }
+    }
+
+    disconnect() {
+        if (!this.isConnected || !this.websocket) {
+            this.logMessage('Not connected', 'error');
+            return;
+        }
+
+        this.websocket.close();
+        this.logMessage('Disconnecting...', 'sent');
+    }
+
+    onWebSocketOpen() {
+        this.isConnected = true;
+        this.updateConnectionStatus(true);
+        this.logMessage('Connected successfully!', 'received');
+        
+        // Enable controls
+        document.getElementById('connectBtn').disabled = true;
+        document.getElementById('disconnectBtn').disabled = false;
+        
+        // Send initial handshake
+        this.sendMessage({ type: 'handshake', message: 'Dashboard connected' });
+    }
+
+    onWebSocketMessage(event) {
+        try {
+            const data = JSON.parse(event.data);
+            this.logMessage(`Received: ${event.data}`, 'received');
+            this.handleIncomingData(data);
+        } catch (error) {
+            this.logMessage(`Received (raw): ${event.data}`, 'received');
+            // Handle non-JSON messages
+            this.handleRawMessage(event.data);
+        }
+    }
+
+    onWebSocketClose() {
+        this.isConnected = false;
+        this.updateConnectionStatus(false);
+        this.logMessage('Connection closed', 'error');
+        
+        // Disable controls
+        document.getElementById('connectBtn').disabled = false;
+        document.getElementById('disconnectBtn').disabled = true;
+        
+        this.websocket = null;
+    }
+
+    onWebSocketError(error) {
+        this.logMessage(`Connection error: ${error.message || 'Unknown error'}`, 'error');
+        this.isConnected = false;
+        this.updateConnectionStatus(false);
+    }
+
+    handleIncomingData(data) {
+        // Handle sensor data
+        if (data.sensors) {
+            this.updateSensorData(data.sensors);
+            this.updateChart(data.sensors);
+        }
+        
+        // Handle device status updates
+        if (data.devices) {
+            this.updateDeviceStatus(data.devices);
+        }
+        
+        // Handle system messages
+        if (data.message) {
+            this.logMessage(`ESP32: ${data.message}`, 'received');
+        }
+    }
+
+    handleRawMessage(message) {
+        // Handle simple string messages from ESP32
+        // Try to parse common patterns
+        
+        // Pattern: "temp:25.5,humidity:60.2,light:850,voltage:3.3"
+        const sensorMatch = message.match(/temp:([\d.]+),humidity:([\d.]+),light:([\d.]+),voltage:([\d.]+)/);
+        if (sensorMatch) {
+            const sensors = {
+                temperature: parseFloat(sensorMatch[1]),
+                humidity: parseFloat(sensorMatch[2]),
+                light: parseFloat(sensorMatch[3]),
+                voltage: parseFloat(sensorMatch[4])
+            };
+            this.updateSensorData(sensors);
+            this.updateChart(sensors);
+            return;
+        }
+        
+        // Pattern: "led1:on,led2:off,fan:on"
+        const deviceMatch = message.match(/led1:(on|off),led2:(on|off),fan:(on|off)/);
+        if (deviceMatch) {
+            const devices = {
+                led1: deviceMatch[1] === 'on',
+                led2: deviceMatch[2] === 'on',
+                fan: deviceMatch[3] === 'on'
+            };
+            this.updateDeviceStatus(devices);
+            return;
+        }
+    }
+
+    updateSensorData(sensors) {
+        if (sensors.temperature !== undefined) {
+            document.getElementById('temperature').textContent = sensors.temperature.toFixed(1);
+        }
+        if (sensors.humidity !== undefined) {
+            document.getElementById('humidity').textContent = sensors.humidity.toFixed(1);
+        }
+        if (sensors.light !== undefined) {
+            document.getElementById('light').textContent = Math.round(sensors.light);
+        }
+        if (sensors.voltage !== undefined) {
+            document.getElementById('voltage').textContent = sensors.voltage.toFixed(2);
+        }
+    }
+
+    updateChart(sensors) {
+        const now = new Date().toLocaleTimeString();
+        
+        // Keep only last 20 data points
+        if (this.chartData.labels.length >= 20) {
+            this.chartData.labels.shift();
+            this.chartData.temperature.shift();
+            this.chartData.humidity.shift();
+            this.chartData.light.shift();
+            this.chartData.voltage.shift();
+        }
+        
+        this.chartData.labels.push(now);
+        this.chartData.temperature.push(sensors.temperature || 0);
+        this.chartData.humidity.push(sensors.humidity || 0);
+        this.chartData.light.push(sensors.light || 0);
+        this.chartData.voltage.push(sensors.voltage || 0);
+        
+        this.chart.update('none'); // Update without animation for real-time feel
+    }
+
+    updateDeviceStatus(devices) {
+        if (devices.led1 !== undefined) {
+            document.getElementById('led1').checked = devices.led1;
+        }
+        if (devices.led2 !== undefined) {
+            document.getElementById('led2').checked = devices.led2;
+        }
+        if (devices.fan !== undefined) {
+            document.getElementById('fan').checked = devices.fan;
+        }
+        if (devices.servo !== undefined) {
+            document.getElementById('servo').value = devices.servo;
+            document.getElementById('servoValue').textContent = devices.servo + '°';
+        }
+    }
+
+    sendControl(device, value) {
+        if (!this.isConnected) {
+            this.logMessage('Not connected to ESP32', 'error');
+            return;
+        }
+
+        const message = {
+            type: 'control',
+            device: device,
+            value: value
+        };
+
+        this.sendMessage(message);
+    }
+
+    sendMessage(message) {
+        if (!this.isConnected || !this.websocket) {
+            this.logMessage('Not connected', 'error');
+            return;
+        }
+
+        try {
+            const jsonMessage = JSON.stringify(message);
+            this.websocket.send(jsonMessage);
+            this.logMessage(`Sent: ${jsonMessage}`, 'sent');
+        } catch (error) {
+            this.logMessage(`Send error: ${error.message}`, 'error');
+        }
+    }
+
+    updateConnectionStatus(connected) {
+        const statusIndicator = document.getElementById('connectionStatus');
+        const statusText = document.getElementById('connectionText');
+        
+        if (connected) {
+            statusIndicator.classList.add('connected');
+            statusText.textContent = 'Connected';
+        } else {
+            statusIndicator.classList.remove('connected');
+            statusText.textContent = 'Disconnected';
+        }
+    }
+
+    logMessage(message, type = 'info') {
+        const logContainer = document.getElementById('messageLog');
+        const timestamp = new Date().toLocaleTimeString();
+        const logEntry = document.createElement('div');
+        
+        logEntry.className = `log-entry ${type}`;
+        logEntry.innerHTML = `<span style="color: #666;">[${timestamp}]</span> ${message}`;
+        
+        logContainer.appendChild(logEntry);
+        logContainer.scrollTop = logContainer.scrollHeight;
+    }
+
+    clearLog() {
+        document.getElementById('messageLog').innerHTML = '';
+        this.logMessage('Log cleared', 'system');
+    }
+
+    // Simulate data for demo purposes
+    startDemo() {
+        if (this.isConnected) {
+            this.logMessage('Cannot start demo while connected to real device', 'error');
+            return;
+        }
+
+        this.logMessage('Starting demo mode...', 'system');
+        
+        setInterval(() => {
+            if (!this.isConnected) {
+                const sensors = {
+                    temperature: 20 + Math.random() * 15,
+                    humidity: 40 + Math.random() * 40,
+                    light: 200 + Math.random() * 600,
+                    voltage: 3.0 + Math.random() * 0.6
+                };
+                
+                this.updateSensorData(sensors);
+                this.updateChart(sensors);
+            }
+        }, 2000);
+    }
+}
+
+// Initialize dashboard when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    const dashboard = new ESP32Dashboard();
+    
+    // Add demo button for testing
+    const demoBtn = document.createElement('button');
+    demoBtn.textContent = '📊 Start Demo';
+    demoBtn.className = 'btn-secondary';
+    demoBtn.style.marginLeft = '10px';
+    demoBtn.onclick = () => dashboard.startDemo();
+    
+    document.querySelector('.connection-controls').appendChild(demoBtn);
+    
+    // Make dashboard globally accessible for debugging
+    window.dashboard = dashboard;
+});
+
+// Add keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+    // Ctrl/Cmd + D for demo mode
+    if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+        e.preventDefault();
+        window.dashboard?.startDemo();
+    }
+    
+    // Ctrl/Cmd + L for clear log
+    if ((e.ctrlKey || e.metaKey) && e.key === 'l') {
+        e.preventDefault();
+        window.dashboard?.clearLog();
+    }
+});
+
+// ESP32 Arduino Code Template (commented for reference)
+/*
+ESP32 WebSocket Server Example:
+
+#include <WiFi.h>
+#include <WebSocketsServer.h>
+#include <ArduinoJson.h>
+
+const char* ssid = "your-wifi-ssid";
+const char* password = "your-wifi-password";
+
+WebSocketsServer webSocket = WebSocketsServer(81);
+
+void setup() {
+    Serial.begin(115200);
+    
+    // Connect to WiFi
+    WiFi.begin(ssid, password);
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(1000);
+        Serial.println("Connecting to WiFi...");
+    }
+    
+    Serial.println("WiFi connected");
+    Serial.print("IP address: ");
+    Serial.println(WiFi.localIP());
+    
+    // Start WebSocket server
+    webSocket.begin();
+    webSocket.onEvent(webSocketEvent);
+}
+
+void loop() {
+    webSocket.loop();
+    
+    // Send sensor data every 2 seconds
+    static unsigned long lastSend = 0;
+    if (millis() - lastSend > 2000) {
+        sendSensorData();
+        lastSend = millis();
+    }
+}
+
+void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length) {
+    switch(type) {
+        case WStype_CONNECTED:
+            Serial.printf("Client %u connected\n", num);
+            break;
+            
+        case WStype_DISCONNECTED:
+            Serial.printf("Client %u disconnected\n", num);
+            break;
+            
+        case WStype_TEXT:
+            handleWebSocketMessage(num, (char*)payload);
+            break;
+    }
+}
+
+void sendSensorData() {
+    DynamicJsonDocument doc(1024);
+    
+    doc["sensors"]["temperature"] = random(200, 350) / 10.0; // 20-35°C
+    doc["sensors"]["humidity"] = random(300, 800) / 10.0;    // 30-80%
+    doc["sensors"]["light"] = random(100, 1000);             // 100-1000 lux
+    doc["sensors"]["voltage"] = random(300, 360) / 100.0;    // 3.0-3.6V
+    
+    String message;
+    serializeJson(doc, message);
+    webSocket.broadcastTXT(message);
+}
+
+void handleWebSocketMessage(uint8_t num, char* payload) {
+    DynamicJsonDocument doc(1024);
+    deserializeJson(doc, payload);
+    
+    if (doc["type"] == "control") {
+        String device = doc["device"];
+        bool value = doc["value"];
+        
+        // Control your devices here
+        if (device == "led1") {
+            digitalWrite(LED_PIN_1, value ? HIGH : LOW);
+        }
+        // Add more device controls...
+    }
+}
+*/
