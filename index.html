@@ -1,17 +1,32 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IoT Dashboard - ESP32 Communication</title>
+    <title>ویزیت کار - خدمات جامع خودرو در مشهد</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
 </head>
 <body class="dark-mode">
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-content">
+            <div class="loading-logo">
+                <i class="fas fa-car"></i>
+                <h2>ویزیت کار</h2>
+            </div>
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+            </div>
+            <p>در حال بارگذاری...</p>
+        </div>
+    </div>
+
     <!-- Theme Toggle Button -->
     <div class="theme-toggle-container">
-        <button class="theme-toggle" id="themeToggle">
+        <button class="theme-toggle" id="themeToggle" aria-label="تغییر تم">
             <i class="fas fa-sun light-icon"></i>
             <i class="fas fa-moon dark-icon"></i>
         </button>
@@ -21,194 +36,545 @@
     <header class="header">
         <div class="container">
             <div class="header-content">
-                <div class="logo">
-                    <i class="fas fa-microchip"></i>
-                    <h1>IoT Dashboard</h1>
+                <div class="logo" data-aos="fade-right">
+                    <i class="fas fa-car"></i>
+                    <h1>ویزیت کار</h1>
                 </div>
-                <div class="connection-status">
-                    <div class="status-indicator" id="connectionStatus">
-                        <span class="status-dot"></span>
-                        <span class="status-text">Disconnected</span>
-                    </div>
+                <nav class="nav" data-aos="fade-left">
+                    <ul class="nav-list">
+                        <li><a href="#home" class="nav-link active">خانه</a></li>
+                        <li><a href="#services" class="nav-link">خدمات</a></li>
+                        <li><a href="#about" class="nav-link">درباره ما</a></li>
+                        <li><a href="#reviews" class="nav-link">نظرات</a></li>
+                        <li><a href="#faq" class="nav-link">سوالات متداول</a></li>
+                        <li><a href="#contact" class="nav-link">تماس</a></li>
+                    </ul>
+                </nav>
+                <div class="mobile-menu-toggle" id="mobileMenuToggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="main">
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="hero-background">
+            <div class="hero-overlay"></div>
+        </div>
         <div class="container">
-            <!-- Connection Panel -->
-            <section class="connection-panel">
-                <h2><i class="fas fa-wifi"></i> WebSocket Connection</h2>
-                <div class="connection-form">
-                    <div class="form-group">
-                        <label for="wsUrl">WebSocket URL:</label>
-                        <input type="text" id="wsUrl" placeholder="ws://192.168.1.100:81" value="ws://192.168.1.100:81">
-                    </div>
-                    <div class="connection-buttons">
-                        <button class="btn btn-primary" id="connectBtn">
-                            <i class="fas fa-plug"></i> Connect
+            <div class="hero-content">
+                <div class="hero-text" data-aos="fade-up">
+                    <h1 class="hero-title">
+                        <span class="highlight">بهترین خدمات خودرو</span>
+                        <br>در مشهد مقدس
+                    </h1>
+                    <p class="hero-description">
+                        با بیش از ۱۵ سال تجربه در زمینه تعمیر و نگهداری خودرو، 
+                        تیم متخصص ما آماده ارائه خدمات با کیفیت و تضمین شده به شماست
+                    </p>
+                    <div class="hero-buttons">
+                        <button class="btn btn-primary" onclick="scrollToSection('services')">
+                            <i class="fas fa-tools"></i>
+                            مشاهده خدمات
                         </button>
-                        <button class="btn btn-secondary" id="disconnectBtn" disabled>
-                            <i class="fas fa-times"></i> Disconnect
+                        <button class="btn btn-secondary" onclick="scrollToSection('contact')">
+                            <i class="fas fa-phone"></i>
+                            تماس با ما
                         </button>
                     </div>
                 </div>
-            </section>
-
-            <!-- Dashboard Grid -->
-            <div class="dashboard-grid">
-                <!-- Sensor Data Cards -->
-                <section class="sensor-section">
-                    <h2><i class="fas fa-thermometer-half"></i> Sensor Data</h2>
-                    <div class="sensor-grid">
-                        <div class="sensor-card">
-                            <div class="sensor-icon">
-                                <i class="fas fa-thermometer-half"></i>
-                            </div>
-                            <div class="sensor-info">
-                                <h3>Temperature</h3>
-                                <div class="sensor-value" id="temperature">--°C</div>
-                            </div>
-                        </div>
-                        <div class="sensor-card">
-                            <div class="sensor-icon">
-                                <i class="fas fa-tint"></i>
-                            </div>
-                            <div class="sensor-info">
-                                <h3>Humidity</h3>
-                                <div class="sensor-value" id="humidity">--%</div>
-                            </div>
-                        </div>
-                        <div class="sensor-card">
-                            <div class="sensor-icon">
-                                <i class="fas fa-lightbulb"></i>
-                            </div>
-                            <div class="sensor-info">
-                                <h3>Light Level</h3>
-                                <div class="sensor-value" id="lightLevel">-- lux</div>
-                            </div>
-                        </div>
-                        <div class="sensor-card">
-                            <div class="sensor-icon">
-                                <i class="fas fa-signal"></i>
-                            </div>
-                            <div class="sensor-info">
-                                <h3>WiFi Signal</h3>
-                                <div class="sensor-value" id="wifiSignal">-- dBm</div>
-                            </div>
-                        </div>
+                <div class="hero-image" data-aos="fade-left">
+                    <div class="car-animation">
+                        <i class="fas fa-car-side"></i>
                     </div>
-                </section>
-
-                <!-- Control Panel -->
-                <section class="control-section">
-                    <h2><i class="fas fa-sliders-h"></i> Device Control</h2>
-                    <div class="control-grid">
-                        <div class="control-card">
-                            <h3>LED Control</h3>
-                            <div class="led-controls">
-                                <div class="led-item">
-                                    <label>Red LED</label>
-                                    <div class="toggle-switch">
-                                        <input type="checkbox" id="redLed" class="toggle-input">
-                                        <label for="redLed" class="toggle-label"></label>
-                                    </div>
-                                </div>
-                                <div class="led-item">
-                                    <label>Green LED</label>
-                                    <div class="toggle-switch">
-                                        <input type="checkbox" id="greenLed" class="toggle-input">
-                                        <label for="greenLed" class="toggle-label"></label>
-                                    </div>
-                                </div>
-                                <div class="led-item">
-                                    <label>Blue LED</label>
-                                    <div class="toggle-switch">
-                                        <input type="checkbox" id="blueLed" class="toggle-input">
-                                        <label for="blueLed" class="toggle-label"></label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="control-card">
-                            <h3>Servo Motor</h3>
-                            <div class="servo-control">
-                                <label for="servoAngle">Angle (0-180°)</label>
-                                <input type="range" id="servoAngle" min="0" max="180" value="90" class="slider">
-                                <div class="servo-value">
-                                    <span id="servoValue">90°</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="control-card">
-                            <h3>Relay Control</h3>
-                            <div class="relay-controls">
-                                <div class="relay-item">
-                                    <label>Relay 1</label>
-                                    <div class="toggle-switch">
-                                        <input type="checkbox" id="relay1" class="toggle-input">
-                                        <label for="relay1" class="toggle-label"></label>
-                                    </div>
-                                </div>
-                                <div class="relay-item">
-                                    <label>Relay 2</label>
-                                    <div class="toggle-switch">
-                                        <input type="checkbox" id="relay2" class="toggle-input">
-                                        <label for="relay2" class="toggle-label"></label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Communication Log -->
-                <section class="log-section">
-                    <h2><i class="fas fa-terminal"></i> Communication Log</h2>
-                    <div class="log-container">
-                        <div class="log-header">
-                            <button class="btn btn-small" id="clearLog">
-                                <i class="fas fa-trash"></i> Clear Log
-                            </button>
-                            <button class="btn btn-small" id="exportLog">
-                                <i class="fas fa-download"></i> Export
-                            </button>
-                        </div>
-                        <div class="log-content" id="logContent">
-                            <div class="log-entry">
-                                <span class="log-time">[12:00:00]</span>
-                                <span class="log-message">Dashboard initialized. Ready to connect to ESP32.</span>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Message Sender -->
-                <section class="message-section">
-                    <h2><i class="fas fa-paper-plane"></i> Send Message</h2>
-                    <div class="message-form">
-                        <div class="form-group">
-                            <label for="messageInput">Custom Message:</label>
-                            <input type="text" id="messageInput" placeholder="Enter custom message to send to ESP32">
-                        </div>
-                        <button class="btn btn-primary" id="sendMessage">
-                            <i class="fas fa-paper-plane"></i> Send
-                        </button>
-                    </div>
-                </section>
+                </div>
             </div>
         </div>
-    </main>
+        <div class="scroll-indicator">
+            <div class="scroll-arrow"></div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="services" id="services">
+        <div class="container">
+            <div class="section-header" data-aos="fade-up">
+                <h2 class="section-title">خدمات ما</h2>
+                <p class="section-description">
+                    ارائه کامل ترین خدمات خودرو با استفاده از پیشرفته ترین تجهیزات و تکنولوژی روز دنیا
+                </p>
+            </div>
+            
+            <div class="services-grid">
+                <div class="service-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="service-icon">
+                        <i class="fas fa-cog"></i>
+                    </div>
+                    <h3>تعمیر موتور</h3>
+                    <p>تعمیر تخصصی موتور خودرو با استفاده از تجهیزات پیشرفته و قطعات اصل</p>
+                    <ul class="service-features">
+                        <li><i class="fas fa-check"></i> تعمیر موتور بنزینی</li>
+                        <li><i class="fas fa-check"></i> تعمیر موتور دیزلی</li>
+                        <li><i class="fas fa-check"></i> تنظیم موتور</li>
+                        <li><i class="fas fa-check"></i> تعویض قطعات فرسوده</li>
+                    </ul>
+                </div>
+
+                <div class="service-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="service-icon">
+                        <i class="fas fa-oil-can"></i>
+                    </div>
+                    <h3>تعویض روغن و فیلتر</h3>
+                    <p>تعویض روغن و فیلتر با بهترین برندهای موجود در بازار</p>
+                    <ul class="service-features">
+                        <li><i class="fas fa-check"></i> تعویض روغن موتور</li>
+                        <li><i class="fas fa-check"></i> تعویض فیلتر هوا</li>
+                        <li><i class="fas fa-check"></i> تعویض فیلتر روغن</li>
+                        <li><i class="fas fa-check"></i> تعویض فیلتر سوخت</li>
+                    </ul>
+                </div>
+
+                <div class="service-card" data-aos="fade-up" data-aos-delay="300">
+                    <div class="service-icon">
+                        <i class="fas fa-car-battery"></i>
+                    </div>
+                    <h3>سیستم برقی</h3>
+                    <p>تعمیر و نگهداری سیستم برقی خودرو شامل باتری، دینام و استارت</p>
+                    <ul class="service-features">
+                        <li><i class="fas fa-check"></i> تعویض باتری</li>
+                        <li><i class="fas fa-check"></i> تعمیر دینام</li>
+                        <li><i class="fas fa-check"></i> تعمیر استارت</li>
+                        <li><i class="fas fa-check"></i> عیب یابی برقی</li>
+                    </ul>
+                </div>
+
+                <div class="service-card" data-aos="fade-up" data-aos-delay="400">
+                    <div class="service-icon">
+                        <i class="fas fa-tachometer-alt"></i>
+                    </div>
+                    <h3>تعمیر گیربکس</h3>
+                    <p>تعمیر تخصصی گیربکس دستی و اتوماتیک با گارانتی معتبر</p>
+                    <ul class="service-features">
+                        <li><i class="fas fa-check"></i> تعمیر گیربکس دستی</li>
+                        <li><i class="fas fa-check"></i> تعمیر گیربکس اتوماتیک</li>
+                        <li><i class="fas fa-check"></i> تعویض روغن گیربکس</li>
+                        <li><i class="fas fa-check"></i> تنظیم کلاچ</li>
+                    </ul>
+                </div>
+
+                <div class="service-card" data-aos="fade-up" data-aos-delay="500">
+                    <div class="service-icon">
+                        <i class="fas fa-car-crash"></i>
+                    </div>
+                    <h3>تعمیر بدنه</h3>
+                    <p>تعمیر و رنگ آمیزی بدنه خودرو با بهترین کیفیت و رنگ</p>
+                    <ul class="service-features">
+                        <li><i class="fas fa-check"></i> تعمیر بدنه</li>
+                        <li><i class="fas fa-check"></i> رنگ آمیزی</li>
+                        <li><i class="fas fa-check"></i> تعویض شیشه</li>
+                        <li><i class="fas fa-check"></i> تعمیر چراغ</li>
+                    </ul>
+                </div>
+
+                <div class="service-card" data-aos="fade-up" data-aos-delay="600">
+                    <div class="service-icon">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <h3>سرویس دوره ای</h3>
+                    <p>سرویس کامل و دوره ای خودرو مطابق با استانداردهای کارخانه</p>
+                    <ul class="service-features">
+                        <li><i class="fas fa-check"></i> سرویس ۵۰۰۰ کیلومتر</li>
+                        <li><i class="fas fa-check"></i> سرویس ۱۰۰۰۰ کیلومتر</li>
+                        <li><i class="fas fa-check"></i> سرویس ۲۰۰۰۰ کیلومتر</li>
+                        <li><i class="fas fa-check"></i> سرویس ۴۰۰۰۰ کیلومتر</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about" id="about">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-text" data-aos="fade-right">
+                    <h2 class="section-title">درباره ویزیت کار</h2>
+                    <p class="about-description">
+                        مرکز خدمات خودرو ویزیت کار با بیش از ۱۵ سال تجربه در زمینه تعمیر و نگهداری خودرو، 
+                        یکی از معتبرترین مراکز خدمات خودرو در مشهد مقدس است. ما با استفاده از پیشرفته ترین 
+                        تجهیزات و تکنولوژی روز دنیا، خدمات با کیفیت و تضمین شده به مشتریان ارائه می دهیم.
+                    </p>
+                    <div class="about-features">
+                        <div class="feature">
+                            <i class="fas fa-medal"></i>
+                            <div>
+                                <h4>کیفیت تضمین شده</h4>
+                                <p>تمام خدمات ما با گارانتی معتبر ارائه می شود</p>
+                            </div>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-clock"></i>
+                            <div>
+                                <h4>سرویس سریع</h4>
+                                <p>انجام کار در کمترین زمان ممکن</p>
+                            </div>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-dollar-sign"></i>
+                            <div>
+                                <h4>قیمت مناسب</h4>
+                                <p>بهترین قیمت با بهترین کیفیت</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="about-image" data-aos="fade-left">
+                    <div class="image-container">
+                        <i class="fas fa-car-side"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-item" data-aos="zoom-in" data-aos-delay="100">
+                    <div class="stat-number" data-target="15000">0</div>
+                    <div class="stat-label">خودرو تعمیر شده</div>
+                </div>
+                <div class="stat-item" data-aos="zoom-in" data-aos-delay="200">
+                    <div class="stat-number" data-target="15">0</div>
+                    <div class="stat-label">سال تجربه</div>
+                </div>
+                <div class="stat-item" data-aos="zoom-in" data-aos-delay="300">
+                    <div class="stat-number" data-target="5000">0</div>
+                    <div class="stat-label">مشتری راضی</div>
+                </div>
+                <div class="stat-item" data-aos="zoom-in" data-aos-delay="400">
+                    <div class="stat-number" data-target="24">0</div>
+                    <div class="stat-label">ساعت خدمات</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Reviews Section -->
+    <section class="reviews" id="reviews">
+        <div class="container">
+            <div class="section-header" data-aos="fade-up">
+                <h2 class="section-title">نظرات مشتریان</h2>
+                <p class="section-description">
+                    نظرات مشتریان راضی ما که تجربه کار با ویزیت کار را داشته اند
+                </p>
+            </div>
+            
+            <div class="reviews-slider" data-aos="fade-up">
+                <div class="review-card active">
+                    <div class="review-header">
+                        <div class="reviewer-info">
+                            <div class="reviewer-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div>
+                                <h4>احمد محمدی</h4>
+                                <div class="stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="review-text">
+                        "بسیار راضی از خدمات ویزیت کار. تعمیر موتور ماشینم را در کمترین زمان و با بهترین کیفیت انجام دادند. 
+                        قیمت هم بسیار مناسب بود. حتماً دوباره مراجعه خواهم کرد."
+                    </p>
+                </div>
+
+                <div class="review-card">
+                    <div class="review-header">
+                        <div class="reviewer-info">
+                            <div class="reviewer-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div>
+                                <h4>فاطمه احمدی</h4>
+                                <div class="stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="review-text">
+                        "تیم ویزیت کار بسیار حرفه ای و متخصص هستند. مشکل گیربکس ماشینم را به خوبی حل کردند 
+                        و گارانتی هم دادند. واقعاً قابل اعتماد هستند."
+                    </p>
+                </div>
+
+                <div class="review-card">
+                    <div class="review-header">
+                        <div class="reviewer-info">
+                            <div class="reviewer-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div>
+                                <h4>علی رضایی</h4>
+                                <div class="stars">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="review-text">
+                        "سرویس دوره ای ماشینم را اینجا انجام دادم. بسیار دقیق و کامل کار کردند. 
+                        تمام قطعات را بررسی کردند و مشکلات احتمالی را هم حل کردند."
+                    </p>
+                </div>
+            </div>
+            
+            <div class="reviews-nav">
+                <button class="review-nav-btn active" data-slide="0"></button>
+                <button class="review-nav-btn" data-slide="1"></button>
+                <button class="review-nav-btn" data-slide="2"></button>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq" id="faq">
+        <div class="container">
+            <div class="section-header" data-aos="fade-up">
+                <h2 class="section-title">سوالات متداول</h2>
+                <p class="section-description">
+                    پاسخ سوالات رایج شما درباره خدمات ویزیت کار
+                </p>
+            </div>
+            
+            <div class="faq-container">
+                <div class="faq-item" data-aos="fade-up" data-aos-delay="100">
+                    <div class="faq-question">
+                        <h3>آیا خدمات شما گارانتی دارد؟</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>بله، تمام خدمات ما با گارانتی معتبر ارائه می شود. مدت گارانتی بسته به نوع خدمت متفاوت است.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item" data-aos="fade-up" data-aos-delay="200">
+                    <div class="faq-question">
+                        <h3>آیا قطعات اصل استفاده می کنید؟</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>بله، ما از قطعات اصل و با کیفیت استفاده می کنیم. در صورت درخواست مشتری، قطعات جایگزین نیز ارائه می دهیم.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item" data-aos="fade-up" data-aos-delay="300">
+                    <div class="faq-question">
+                        <h3>چقدر طول می کشد تا کار تمام شود؟</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>مدت زمان بسته به نوع کار متفاوت است. سرویس ساده معمولاً ۱-۲ ساعت، تعمیرات پیچیده ۱-۲ روز طول می کشد.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item" data-aos="fade-up" data-aos-delay="400">
+                    <div class="faq-question">
+                        <h3>آیا امکان تعمیر در محل وجود دارد؟</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>بله، برای برخی خدمات امکان اعزام تکنسین به محل وجود دارد. لطفاً با ما تماس بگیرید.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item" data-aos="fade-up" data-aos-delay="500">
+                    <div class="faq-question">
+                        <h3>آیا نوبت دهی آنلاین دارید؟</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>بله، می توانید از طریق وب سایت یا تماس تلفنی نوبت بگیرید. همچنین امکان رزرو آنلاین در حال توسعه است.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item" data-aos="fade-up" data-aos-delay="600">
+                    <div class="faq-question">
+                        <h3>آیا خدمات اورژانسی ارائه می دهید؟</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>بله، برای خدمات اورژانسی ۲۴ ساعته آماده خدمت رسانی هستیم. شماره تماس اورژانسی: ۰۹۱۵۱۲۳۴۵۶۷</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="contact" id="contact">
+        <div class="container">
+            <div class="section-header" data-aos="fade-up">
+                <h2 class="section-title">تماس با ما</h2>
+                <p class="section-description">
+                    برای دریافت مشاوره و رزرو نوبت با ما تماس بگیرید
+                </p>
+            </div>
+            
+            <div class="contact-content">
+                <div class="contact-info" data-aos="fade-right">
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div>
+                            <h4>آدرس</h4>
+                            <p>مشهد، خیابان امام رضا، پلاک ۱۲۳</p>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <div>
+                            <h4>تلفن</h4>
+                            <p>۰۵۱-۳۸۷۶۵۴۳۲</p>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <div>
+                            <h4>موبایل</h4>
+                            <p>۰۹۱۵۱۲۳۴۵۶۷</p>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div>
+                            <h4>ساعات کاری</h4>
+                            <p>شنبه تا چهارشنبه: ۸ صبح تا ۸ شب<br>پنجشنبه: ۸ صبح تا ۴ عصر</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="contact-form" data-aos="fade-left">
+                    <form id="contactForm">
+                        <div class="form-group">
+                            <input type="text" id="name" name="name" placeholder="نام و نام خانوادگی" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="tel" id="phone" name="phone" placeholder="شماره تلفن" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" id="carModel" name="carModel" placeholder="مدل خودرو">
+                        </div>
+                        <div class="form-group">
+                            <select id="service" name="service" required>
+                                <option value="">انتخاب خدمت</option>
+                                <option value="engine">تعمیر موتور</option>
+                                <option value="oil">تعویض روغن</option>
+                                <option value="electrical">سیستم برقی</option>
+                                <option value="gearbox">تعمیر گیربکس</option>
+                                <option value="body">تعمیر بدنه</option>
+                                <option value="service">سرویس دوره ای</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <textarea id="message" name="message" placeholder="توضیحات اضافی" rows="4"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i>
+                            ارسال درخواست
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
-            <p>&copy; 2024 IoT Dashboard - ESP32 Communication Interface</p>
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="footer-logo">
+                        <i class="fas fa-car"></i>
+                        <h3>ویزیت کار</h3>
+                    </div>
+                    <p>بهترین خدمات خودرو در مشهد مقدس با بیش از ۱۵ سال تجربه</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-telegram"></i></a>
+                        <a href="#"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>خدمات</h4>
+                    <ul>
+                        <li><a href="#services">تعمیر موتور</a></li>
+                        <li><a href="#services">تعویض روغن</a></li>
+                        <li><a href="#services">سیستم برقی</a></li>
+                        <li><a href="#services">تعمیر گیربکس</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>لینک های مفید</h4>
+                    <ul>
+                        <li><a href="#about">درباره ما</a></li>
+                        <li><a href="#reviews">نظرات</a></li>
+                        <li><a href="#faq">سوالات متداول</a></li>
+                        <li><a href="#contact">تماس</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>اطلاعات تماس</h4>
+                    <p><i class="fas fa-map-marker-alt"></i> مشهد، خیابان امام رضا</p>
+                    <p><i class="fas fa-phone"></i> ۰۵۱-۳۸۷۶۵۴۳۲</p>
+                    <p><i class="fas fa-mobile-alt"></i> ۰۹۱۵۱۲۳۴۵۶۷</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; ۱۴۰۳ ویزیت کار - تمامی حقوق محفوظ است</p>
+            </div>
         </div>
     </footer>
 
+    <!-- Back to Top Button -->
+    <button class="back-to-top" id="backToTop">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
