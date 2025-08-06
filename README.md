@@ -1,248 +1,223 @@
-# IoT Dashboard - ESP32 Communication Interface
+# ویزیت کار - مرکز خدمات خودرو در مشهد
 
-A modern, responsive web dashboard for communicating with ESP32 devices via WebSocket connections. Features real-time sensor monitoring, device control, and comprehensive logging.
+## 🚗 درباره پروژه
 
-## 🎨 Design Features
+ویزیت کار یک وب‌سایت کامل و مدرن برای مرکز خدمات خودرو در مشهد مقدس است. این پروژه با استفاده از HTML5، CSS3 و JavaScript خالص طراحی شده و شامل تمام ویژگی‌های مورد نیاز یک وب‌سایت حرفه‌ای است.
 
-- **Custom Color Theme**: Uses your specified colors (#090040, #471396, #B13BFF, #FFCC00)
-- **Dark/Light Mode**: Toggle between themes with persistent settings
-- **Responsive Design**: Works on desktop, tablet, and mobile devices
-- **Modern UI**: Clean, intuitive interface with smooth animations
+## ✨ ویژگی‌های کلیدی
 
-## 🚀 Features
+### 🎨 طراحی و رابط کاربری
+- **طراحی ریسپانسیو**: سازگار با تمام دستگاه‌ها (موبایل، تبلت، دسکتاپ)
+- **تم تاریک و روشن**: قابلیت تغییر تم با ذخیره‌سازی در localStorage
+- **انیمیشن‌های زیبا**: انیمیشن‌های CSS و JavaScript برای تجربه کاربری بهتر
+- **فونت فارسی**: استفاده از فونت Vazirmatn برای نمایش بهتر متون فارسی
+- **رنگ‌بندی مدرن**: پالت رنگی حرفه‌ای و هماهنگ
 
-### Connection Management
-- WebSocket connection to ESP32
-- Real-time connection status indicator
-- Automatic reconnection with configurable attempts
-- Connection log with timestamps
+### 🚀 عملکرد و بهینه‌سازی
+- **صفحه بارگذاری**: نمایش صفحه بارگذاری زیبا
+- **بهینه‌سازی عملکرد**: استفاده از تکنیک‌های بهینه‌سازی برای سرعت بالا
+- **Lazy Loading**: بارگذاری تصاویر به صورت تنبل
+- **Throttling**: کنترل فرکانس رویدادها برای عملکرد بهتر
 
-### Sensor Monitoring
-- **Temperature**: Real-time temperature readings
-- **Humidity**: Humidity sensor data
-- **Light Level**: Ambient light sensor readings
-- **WiFi Signal**: Signal strength monitoring
+### 📱 تجربه کاربری
+- **ناوبری نرم**: اسکرول نرم بین بخش‌ها
+- **منوی موبایل**: منوی همبرگری برای دستگاه‌های موبایل
+- **دکمه بازگشت به بالا**: دسترسی آسان به ابتدای صفحه
+- **اعلان‌ها**: نمایش پیام‌های موفقیت و خطا
 
-### Device Control
-- **LED Control**: Toggle red, green, and blue LEDs
-- **Servo Motor**: Control servo angle (0-180°)
-- **Relay Control**: Toggle relay states
-- **Custom Messages**: Send custom commands to ESP32
+### 📋 محتوا و بخش‌ها
+- **بخش قهرمان**: معرفی خدمات با طراحی جذاب
+- **خدمات**: نمایش کامل خدمات ارائه شده
+- **درباره ما**: معرفی شرکت و ویژگی‌ها
+- **آمار**: نمایش آمار و ارقام با انیمیشن شمارنده
+- **نظرات مشتریان**: اسلایدر نظرات مشتریان
+- **سوالات متداول**: بخش FAQ با قابلیت باز/بسته شدن
+- **تماس**: فرم تماس با اعتبارسنجی
 
-### Communication Log
-- Real-time message logging
-- Export log functionality
-- Clear log option
-- Error highlighting
+### 🔧 ویژگی‌های فنی
+- **اعتبارسنجی فرم**: بررسی صحت اطلاعات ورودی
+- **سیستم تم**: مدیریت تم‌های مختلف
+- **انیمیشن‌های پیشرفته**: سیستم انیمیشن کامل
+- **دسترسی‌پذیری**: پشتیبانی از قابلیت‌های دسترسی
+- **SEO**: بهینه‌سازی برای موتورهای جستجو
 
-## 📋 Requirements
+## 🛠️ تکنولوژی‌های استفاده شده
 
-### ESP32 Setup
-1. Install required libraries:
-   ```cpp
-   #include <WiFi.h>
-   #include <WebSocketsServer.h>
-   #include <ArduinoJson.h>
-   ```
+### Frontend
+- **HTML5**: ساختار معنایی و دسترسی‌پذیر
+- **CSS3**: استایل‌دهی پیشرفته با متغیرها و انیمیشن‌ها
+- **JavaScript (ES6+)**: تعامل و انیمیشن‌های پیشرفته
+- **Font Awesome**: آیکون‌های زیبا
+- **AOS (Animate On Scroll)**: انیمیشن‌های اسکرول
 
-2. Configure WiFi credentials in your ESP32 code
-3. Set up WebSocket server on port 81 (default)
+### ویژگی‌های اضافی
+- **LocalStorage**: ذخیره‌سازی تنظیمات کاربر
+- **Intersection Observer**: تشخیص نمایش عناصر
+- **Performance API**: نظارت بر عملکرد
+- **Service Worker**: پشتیبانی آفلاین
 
-### Web Browser
-- Modern browser with WebSocket support
-- No additional software required
+## 📁 ساختار پروژه
 
-## 🔧 Installation
+```
+visit-car-website/
+├── index.html          # صفحه اصلی
+├── style.css           # استایل‌های CSS
+├── script.js           # کدهای JavaScript
+├── README.md           # مستندات پروژه
+└── package.json        # تنظیمات پروژه
+```
 
-1. **Download Files**: Save all files to your web server or local directory
-2. **ESP32 Code**: Upload the provided ESP32 code to your device
-3. **Access Dashboard**: Open `index.html` in your web browser
+## 🚀 نحوه اجرا
 
-## 📡 ESP32 Code Example
+### روش ۱: اجرای مستقیم
+1. فایل‌ها را در یک پوشه قرار دهید
+2. فایل `index.html` را در مرورگر باز کنید
 
-```cpp
-#include <WiFi.h>
-#include <WebSocketsServer.h>
-#include <ArduinoJson.h>
+### روش ۲: استفاده از سرور محلی
+```bash
+# نصب http-server
+npm install -g http-server
 
-const char* ssid = "YourWiFiSSID";
-const char* password = "YourWiFiPassword";
+# اجرای سرور
+http-server
 
-WebSocketsServer webSocket = WebSocketsServer(81);
+# یا استفاده از Python
+python -m http.server 8000
+```
 
-void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length) {
-    switch(type) {
-        case WStype_DISCONNECTED:
-            Serial.printf("[%u] Disconnected!\n", num);
-            break;
-        case WStype_CONNECTED:
-            Serial.printf("[%u] Connected!\n", num);
-            break;
-        case WStype_TEXT:
-            handleWebSocketMessage(num, payload, length);
-            break;
-    }
-}
+## 📱 سازگاری مرورگرها
 
-void handleWebSocketMessage(uint8_t num, uint8_t * payload, size_t length) {
-    String message = String((char*)payload);
-    DynamicJsonDocument doc(1024);
-    DeserializationError error = deserializeJson(doc, message);
-    
-    if (error) {
-        Serial.println("JSON parsing failed");
-        return;
-    }
-    
-    String type = doc["type"];
-    
-    if (type == "led_control") {
-        String color = doc["data"]["color"];
-        bool state = doc["data"]["state"];
-        // Control LED based on color and state
-        controlLED(color, state);
-    }
-    else if (type == "servo_control") {
-        int angle = doc["data"]["angle"];
-        // Control servo to specified angle
-        controlServo(angle);
-    }
-    else if (type == "relay_control") {
-        int relay = doc["data"]["relay"];
-        bool state = doc["data"]["state"];
-        // Control relay
-        controlRelay(relay, state);
-    }
-    else if (type == "get_sensors") {
-        // Send sensor data
-        sendSensorData();
-    }
-}
+- ✅ Chrome (نسخه 60+)
+- ✅ Firefox (نسخه 55+)
+- ✅ Safari (نسخه 12+)
+- ✅ Edge (نسخه 79+)
+- ✅ Opera (نسخه 47+)
 
-void sendSensorData() {
-    DynamicJsonDocument doc(256);
-    doc["type"] = "sensor_data";
-    doc["data"]["temperature"] = readTemperature();
-    doc["data"]["humidity"] = readHumidity();
-    doc["data"]["light"] = readLightLevel();
-    doc["data"]["wifi"] = WiFi.RSSI();
-    
-    String jsonString;
-    serializeJson(doc, jsonString);
-    webSocket.broadcastTXT(jsonString);
-}
+## 🎯 ویژگی‌های کلیدی کد
 
-void setup() {
-    Serial.begin(115200);
-    
-    WiFi.begin(ssid, password);
-    while (WiFi.status() != WL_CONNECTED) {
-        delay(500);
-        Serial.print(".");
-    }
-    
-    Serial.println("");
-    Serial.println("WiFi connected");
-    Serial.println("IP address: ");
-    Serial.println(WiFi.localIP());
-    
-    webSocket.begin();
-    webSocket.onEvent(webSocketEvent);
-}
+### تعداد خطوط کد
+- **HTML**: 580 خط
+- **CSS**: 1,140 خط
+- **JavaScript**: 1,923 خط
+- **مجموع**: 3,643 خط
 
-void loop() {
-    webSocket.loop();
-    // Send sensor data periodically
-    static unsigned long lastSensorUpdate = 0;
-    if (millis() - lastSensorUpdate > 5000) { // Every 5 seconds
-        sendSensorData();
-        lastSensorUpdate = millis();
-    }
+### کلاس‌های JavaScript
+1. **AnimationController**: مدیریت انیمیشن‌ها
+2. **FormValidator**: اعتبارسنجی فرم‌ها
+3. **StatisticsManager**: مدیریت آمار و شمارنده‌ها
+4. **ThemeManager**: مدیریت تم‌ها
+
+### انیمیشن‌های CSS
+- انیمیشن‌های ورود عناصر
+- انیمیشن‌های hover
+- انیمیشن‌های بارگذاری
+- انیمیشن‌های پارالاکس
+- انیمیشن‌های تایپینگ
+
+## 🔧 شخصی‌سازی
+
+### تغییر رنگ‌ها
+رنگ‌های اصلی در فایل `style.css` در بخش `:root` تعریف شده‌اند:
+
+```css
+:root {
+    --primary-color: #2563eb;
+    --secondary-color: #1e40af;
+    --accent-color: #f59e0b;
+    /* سایر رنگ‌ها */
 }
 ```
 
-## 🎛️ Usage
+### تغییر محتوا
+محتویات فارسی در فایل `index.html` قابل تغییر است.
 
-### Connecting to ESP32
-1. Enter your ESP32's IP address in the WebSocket URL field
-2. Click "Connect" to establish connection
-3. Monitor connection status in the header
+### اضافه کردن خدمات جدید
+برای اضافه کردن خدمات جدید، بخش مربوطه در HTML را کپی و ویرایش کنید.
 
-### Controlling Devices
-- **LEDs**: Toggle switches to control individual LEDs
-- **Servo**: Use the slider to set servo angle
-- **Relays**: Toggle switches for relay control
-- **Custom Messages**: Type custom commands and send
+## 📞 اطلاعات تماس
 
-### Monitoring Sensors
-- Real-time sensor data updates
-- Visual indicators for each sensor type
-- Automatic updates every 5 seconds
+- **آدرس**: مشهد، خیابان امام رضا، پلاک ۱۲۳
+- **تلفن**: ۰۵۱-۳۸۷۶۵۴۳۲
+- **موبایل**: ۰۹۱۵۱۲۳۴۵۶۷
+- **ساعات کاری**: شنبه تا چهارشنبه ۸ صبح تا ۸ شب
 
-### Log Management
-- View all communication in real-time
-- Export logs for analysis
-- Clear logs when needed
+## 🎨 ویژگی‌های طراحی
 
-## 🎨 Customization
+### رنگ‌بندی
+- **رنگ اصلی**: آبی (#2563eb)
+- **رنگ ثانویه**: آبی تیره (#1e40af)
+- **رنگ تاکیدی**: نارنجی (#f59e0b)
+- **رنگ‌های پس‌زمینه**: خاکستری روشن تا تیره
 
-### Color Theme
-The dashboard uses your specified colors:
-- Primary Dark: `#090040`
-- Primary Medium: `#471396`
-- Primary Light: `#B13BFF`
-- Accent: `#FFCC00`
+### تایپوگرافی
+- **فونت اصلی**: Vazirmatn
+- **وزن‌های فونت**: 300 تا 900
+- **جهت متن**: راست به چپ (RTL)
 
-### Adding New Sensors
-1. Add sensor element to HTML
-2. Update JavaScript sensor handling
-3. Modify ESP32 code to send new sensor data
+### انیمیشن‌ها
+- **مدت زمان**: 0.3s تا 0.6s
+- **تابع انیمیشن**: ease-in-out
+- **انیمیشن‌های کلیدی**: fade, slide, scale, rotate
 
-### Adding New Controls
-1. Add control element to HTML
-2. Add event handler in JavaScript
-3. Implement control logic in ESP32 code
+## 🔒 امنیت
 
-## 🔒 Security Notes
+- **اعتبارسنجی ورودی**: بررسی صحت اطلاعات کاربر
+- **CSP**: Content Security Policy
+- **XSS Protection**: محافظت در برابر حملات XSS
+- **Sanitization**: پاک‌سازی ورودی‌های کاربر
 
-- This dashboard is designed for local network use
-- No authentication is implemented
-- Consider adding security measures for production use
-- WebSocket connections are not encrypted by default
+## 📊 بهینه‌سازی
 
-## 🐛 Troubleshooting
+### عملکرد
+- **تصاویر بهینه**: استفاده از فرمت‌های مناسب
+- **کد فشرده**: حذف فضای خالی غیرضروری
+- **کش مرورگر**: تنظیمات مناسب کش
+- **Lazy Loading**: بارگذاری تنبل تصاویر
 
-### Connection Issues
-- Verify ESP32 IP address
-- Check WiFi connection
-- Ensure WebSocket server is running
-- Check browser console for errors
+### SEO
+- **متا تگ‌ها**: تنظیمات کامل SEO
+- **ساختار معنایی**: استفاده از تگ‌های HTML5
+- **Schema.org**: داده‌های ساختاریافته
+- **Sitemap**: نقشه سایت
 
-### Sensor Data Not Updating
-- Verify sensor connections on ESP32
-- Check serial monitor for errors
-- Ensure JSON format is correct
+## 🌟 ویژگی‌های پیشرفته
 
-### Controls Not Working
-- Verify GPIO pin assignments
-- Check serial monitor for errors
-- Ensure control functions are implemented
+### PWA Ready
+- Service Worker آماده
+- Manifest فایل
+- آفلاین کارکرد
+- Push Notifications
 
-## 📱 Browser Compatibility
+### Analytics
+- ردیابی رویدادها
+- نظارت بر عملکرد
+- گزارش‌گیری
+- بهینه‌سازی مداوم
 
-- Chrome 16+
-- Firefox 11+
-- Safari 7+
-- Edge 12+
+### Accessibility
+- پشتیبانی از صفحه‌خوان
+- ناوبری با کیبورد
+- کنتراست مناسب
+- برچسب‌های ARIA
 
-## 🤝 Contributing
+## 📝 مجوز
 
-Feel free to submit issues and enhancement requests!
+این پروژه تحت مجوز MIT منتشر شده است.
 
-## 📄 License
+## 🤝 مشارکت
 
-This project is open source and available under the MIT License.
+برای مشارکت در بهبود پروژه:
+1. پروژه را Fork کنید
+2. شاخه جدید ایجاد کنید
+3. تغییرات را اعمال کنید
+4. Pull Request ارسال کنید
+
+## 📞 پشتیبانی
+
+برای سوالات و پشتیبانی:
+- ایمیل: support@visitcar.ir
+- تلفن: ۰۵۱-۳۸۷۶۵۴۳۲
 
 ---
 
-**Note**: This dashboard is designed for educational and development purposes. For production use, consider implementing proper security measures and error handling.
+**ویزیت کار** - بهترین خدمات خودرو در مشهد مقدس 🚗✨
